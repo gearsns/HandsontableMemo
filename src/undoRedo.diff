@@ -1,0 +1,40 @@
+--- plugins\undoRedo\undoRedo.js	Wed Dec 19 21:15:02 2018
++++ plugins\undoRedo\undoRedo.js	Mon Apr 18 22:47:15 2022
+@@ -266,7 +266,7 @@
+   instance.addHookOnce('afterChange', undoneCallback);
+ 
+   instance.setDataAtRowProp(data, null, null, 'UndoRedo.undo');
+-
++  const buf = instance.undoRedo.undoneActions.slice(); // 2022/04/18 Gears
+   for (let i = 0, len = data.length; i < len; i++) {
+     if (instance.getSettings().minSpareRows && data[i][0] + 1 + instance.getSettings().minSpareRows === instance.countRows() &&
+       emptyRowsAtTheEnd === instance.getSettings().minSpareRows) {
+@@ -283,7 +283,7 @@
+       instance.undoRedo.doneActions.pop();
+     }
+   }
+-
++  instance.undoRedo.undoneActions = buf; // 2022/04/18 Gears
+ };
+ UndoRedo.ChangeAction.prototype.redo = function(instance, onFinishCallback) {
+   const data = deepClone(this.changes);
+--- editorManager.js	Wed Dec 19 21:15:02 2018
++++ editorManager.js	Wed Apr 20 19:57:25 2022
+@@ -178,6 +178,17 @@
+         if (_this.isEditorOpened()) {
+ 
+           if (activeEditor && activeEditor.state !== EditorState.WAITING) {
++            const val = activeEditor.getValue(); // 2022/04/20 Gears
++            if (val === '' || val === null) {
++              const rowCount = instance.countRows();
++              const minSpareRows = instance.getSettings().minSpareRows;
++              if (activeEditor.row >= rowCount - minSpareRows - 1) {
++                _this.closeEditorAndRestoreOriginalValue(ctrlDown);
++                activeEditor.focus();
++                event.preventDefault(); // don't add newline to field
++                return;
++              }
++            } // 2022/04/20 Gears
+             _this.closeEditorAndSaveChanges(ctrlDown);
+           }
+           moveSelectionAfterEnter(event.shiftKey);
