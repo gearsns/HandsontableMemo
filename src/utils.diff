@@ -1,0 +1,11 @@
+--- plugins/copyPaste/utils.js	Wed Dec 19 21:15:02 2018
++++ plugins/copyPaste/utils.js	Thu Dec 12 09:48:56 2024
+@@ -61,7 +61,7 @@
+ 
+   if (typeof checkElement === 'string') {
+     const tempElem = document.createElement('div');
+-    tempElem.innerHTML = checkElement.replace(/\n/g, '');
++    tempElem.innerHTML = checkElement.replace(/\n/g, '').replace(/\r/g, '');
+     checkElement = tempElem.querySelector('table');
+   }
+ 
